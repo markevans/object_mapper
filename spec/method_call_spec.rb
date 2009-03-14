@@ -22,4 +22,13 @@ describe MethodCall do
     method_call = MethodCall.new(:hi){ |doobie| puts doobie }
     method_call.block.should be_kind_of(Proc)
   end
+  
+  describe "call_on" do
+    it "should call the method on the passed in object and return the value" do
+      string = 'yoh washup'
+      method_call = MethodCall.new(:gsub, 'h', 'e')
+      method_call.call_on(string).should == 'yoe waseup'
+    end
+  end
+  
 end

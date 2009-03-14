@@ -8,5 +8,9 @@ module ObjectMapper
   
     attr_reader :method, :args, :block
   
+    def call_on(obj)
+      obj.send(method, *args)
+    end
+  
   end
 end
