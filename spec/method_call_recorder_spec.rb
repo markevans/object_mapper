@@ -1,5 +1,4 @@
 require "#{File.dirname(__FILE__)}/spec_helper"
-require 'ostruct'
 
 include ObjectMapper
 
@@ -7,8 +6,6 @@ describe MethodCallRecorder do
 
   before(:each) do
     @rec          = MethodCallRecorder.new
-    @inner_struct = OpenStruct.new :duck => 'hello'
-    @struct       = OpenStruct.new :fish => @inner_struct
   end
 
   it "should allow any combination of chained methods on it" do
@@ -27,7 +24,9 @@ describe MethodCallRecorder do
   end
 
   it "should be able to play back its method chain on another object" do
-    obj = { :a => [@struct, 2] }
+    inner = mock('inner', :duck => 'hello')
+    struct = mock('struct', :fish => inner)
+    obj = { :a => [struct, 2] }
     @rec[:a][0].fish.duck
     @rec.playback(obj).should == 'hello'
   end
