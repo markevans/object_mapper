@@ -79,4 +79,41 @@ describe MethodCall do
 
   end
   
+  describe "getting the type" do
+    it "should detect hash readers" do
+      MethodCall.new(:[], 'there').type.should == :hash_reader
+    end
+    it "should detect hash writers" do
+      MethodCall.new(:[]=, 'there', 4).type.should == :hash_writer
+    end
+    it "should detect array readers" do
+      MethodCall.new(:[], 7).type.should == :array_reader
+    end
+    it "should detect array writer" do
+      MethodCall.new(:[]=, 3, 5).type.should == :array_writer
+    end
+    it "should detect getters" do
+      MethodCall.new(:undre).type.should == :attr_reader
+    end
+    it "should detect setters" do
+      MethodCall.new(:bob=, 'there').type.should == :attr_writer
+    end
+    
+  end
+  
+  describe "comparing with other method calls" do
+    it "should return as equal if both have same method and args" do
+      MethodCall.new(:yes, 'sadf', :ue, 4).should == MethodCall.new(:yes, 'sadf', :ue, 4)
+    end
+    it "should return as not equal if same method but different args" do
+      MethodCall.new(:yes, 'sadf', 4).should_not == MethodCall.new(:yes, 'sadf', :ue, 4)
+    end
+    it "should return as not equal if same args but different method" do
+      MethodCall.new(:yes, 'sadf', :ue, 4).should_not == MethodCall.new(:no, 'sadf', :ue, 4)
+    end
+    it "should return as not equal if different method and args" do
+      MethodCall.new(:yes, 'sadf', :ue, 4).should_not == MethodCall.new(:no, 3, 5, 'sdf')
+    end
+  end
+  
 end

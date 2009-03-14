@@ -35,6 +35,19 @@ module ObjectMapper
       new_method_call
     end
     
+    def type
+      case method.to_s
+      when '[]'  then (args.first.is_a?(Fixnum) ? :array_reader : :hash_reader)
+      when '[]=' then (args.first.is_a?(Fixnum) ? :array_writer : :hash_writer)
+      when /\=$/ then :attr_writer
+      else :attr_reader
+      end
+    end
+    
+    def ==(other)
+      self.method == other.method && self.args == other.args
+    end
+    
     protected
     
     attr_writer :method
