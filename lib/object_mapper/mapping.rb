@@ -17,12 +17,12 @@ module ObjectMapper
       in_rec, out_rec = recorder_objects
       output ||= initial_class(out_rec).new
       begin
-        value = in_rec.playback(input)
+        value = in_rec.play(input)
       rescue NoMethodError, ArgumentError => e
         raise MappingInputError, "Couldn't apply mapping to input: #{e.message}"
       end
       begin
-        out_rec.playback(output, :assign => value )
+        out_rec.play(output, :assign => value )
       rescue NoMethodError, ArgumentError => e
         raise MappingOutputError, "Couldn't apply mapping to output: #{e.message}"
       end

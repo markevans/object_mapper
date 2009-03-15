@@ -5,20 +5,20 @@ module ObjectMapper
       @parent = parent
     end
 
-    def playback(object, opts={}, &blk)
+    def play(object, opts={}, &blk)
       if opts[:assign]
-        self.class.playback_and_assign(object, self.method_chain, opts[:assign])
+        playback_and_assign(object, method_chain, opts[:assign])
       else
-        self.class.playback(object, self.method_chain, &blk)
+        playback(object, method_chain, &blk)
       end
     end
 
     def methods
-      method_chain.map{|meth_spec| meth_spec.first }
+      method_chain.map{|method_call| method_call.method }
     end
 
     def method_types
-      method_chain.map{|method_spec| self.class.method_type(method_spec) }
+      method_chain.map{|method_call| method_call.type }
     end
 
     def root_ancestor
@@ -40,7 +40,7 @@ module ObjectMapper
     end
 
     def add_to_method_chain(meth, *args)
-      method_chain << [meth, *args]
+      method_chain << MethodCall.new(meth, *args)
       parent.add_to_method_chain(meth, *args) if parent
     end
 
@@ -48,61 +48,29 @@ module ObjectMapper
 
     private
 
-    def self.method_type(method_spec)
-      meth, *args = method_spec
-      case meth.to_s
-      when '[]'  then (args.first.is_a?(Fixnum) ? :array_reader : :hash_reader)
-      when '[]=' then (args.first.is_a?(Fixnum) ? :array_writer : :hash_writer)
-      when /\=$/ then :attr_writer
-      else :attr_reader
-      end
-    end
-
-    def self.playback(object, method_chain, &blk)
+    def playback(object, method_chain, &blk)
       i = 0
-      method_chain.inject(object) do |obj, method_spec|
+      method_chain.inject(object) do |obj, method_call|
         i += 1
-        yield(obj, method_spec, method_chain[i]) if block_given?
-        obj.send(*method_spec)
+        yield(obj, method_call, method_chain[i]) if block_given?
+        method_call.call_on(obj)
       end
     end
 
-    def self.playback_and_assign(object, method_chain, value)
+    def playback_and_assign(object, method_chain, value)
       if  method_chain.empty?
         object = value
       else
         meth_chain = method_chain.dup
-        # Turn the last method into a setter
-        meth_chain[-1] = setter_method(meth_chain[-1], value)
-        playback(object, meth_chain) do |obj, method_spec, next_method_spec|
+        meth_chain[-1] = meth_chain[-1].to_setter(value)
+        playback(object, meth_chain) do |obj, method_call, next_method_call|
           # Look ahead to the method which will be called, and pre-set it so that
           # it will return something which can carry on the chain
-          sub_obj = ensure_obj_can_call_method(obj.send(*method_spec), next_method_spec) if next_method_spec
-          obj.send( *setter_method(method_spec, sub_obj) )
-          obj.send(*method_spec)
+          sub_obj = next_method_call.ensure_obj_can_call(method_call.call_on(obj)) if next_method_call
+          method_call.to_setter(sub_obj).call_on(obj)
+          method_call.call_on(obj)
         end
       end
-    end
-
-    def self.ensure_obj_can_call_method(obj, method_spec)
-      meth, *args = method_spec
-      klass = case method_type(method_spec)
-      when :array_reader, :array_writer then Array
-      when :hash_reader,  :hash_writer then Hash
-      end
-      obj = klass.new unless obj.is_a?(klass)
-      obj
-    end
-
-    def self.setter_method(method_spec, value)
-      meth, *args = method_spec
-      if meth.to_s =~ /=$/
-        args[-1] = value
-      else
-        args << value
-        meth = "#{meth}=".to_sym
-      end
-      [meth, *args]
     end
 
     def method_missing(meth, *args)

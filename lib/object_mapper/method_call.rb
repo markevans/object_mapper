@@ -44,6 +44,15 @@ module ObjectMapper
       end
     end
     
+    def ensure_obj_can_call(obj)
+      klass = case type
+      when :array_reader, :array_writer then Array
+      when :hash_reader,  :hash_writer then Hash
+      end
+      obj = klass.new unless obj.is_a?(klass)
+      obj
+    end
+    
     def ==(other)
       self.method == other.method && self.args == other.args
     end

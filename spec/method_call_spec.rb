@@ -142,4 +142,26 @@ describe MethodCall do
     end
   end
   
+  describe "ensuring method can be called on an obj" do
+
+    describe "when the cumulative method chain is empty" do
+      it "should create a hash if necessary" do
+        MethodCall.new(:[],:hello).ensure_obj_can_call('poo').should == {}
+      end
+
+      it "should create an array if necessary" do
+        MethodCall.new(:[],4).ensure_obj_can_call('poo').should == []
+      end
+
+      it "should not overwrite a hash if it already exists" do
+        MethodCall.new(:[],:hello).ensure_obj_can_call({:g => 4}).should == {:g => 4}
+      end
+
+      it "should not overwrite an array if it already exists" do
+        MethodCall.new(:[],4).ensure_obj_can_call([7,8,9]).should == [7,8,9]
+      end
+    end
+
+  end
+
 end
