@@ -25,7 +25,7 @@ module ObjectMapper
     end
     
     def to_setter(value)
-      new_method_call = self.dup
+      new_method_call = self.deep_dup
       if setter?
         new_method_call.args[-1] = value
       else
@@ -46,6 +46,14 @@ module ObjectMapper
     
     def ==(other)
       self.method == other.method && self.args == other.args
+    end
+    
+    def deep_dup
+      self.class.new(method, *args, &block)
+    end
+    
+    def to_s
+      to_a.to_s
     end
     
     protected

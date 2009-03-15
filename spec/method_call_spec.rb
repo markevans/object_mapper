@@ -59,6 +59,26 @@ describe MethodCall do
     end
   end
   
+  describe "duplication" do
+    before(:each) do
+      @mc1 = MethodCall.new(:[], 3)
+      @mc2 = @mc1.deep_dup
+    end
+    it "should be able to duplicate itself" do
+      @mc2.should be_instance_of(MethodCall)
+    end
+    it "should deep clone its method" do
+      @mc2.send(:method=, :hi)
+      @mc2.method.should == :hi # Just to check
+      @mc1.method.should == :[] 
+    end
+    it "should deep clone its args" do
+      @mc2.args << :gog
+      @mc2.args.should == [3, :gog] # Just to check
+      @mc1.args.should == [3]
+    end
+  end
+  
   describe "making methods into setters" do
 
     it "should turn [] into a setter" do
@@ -75,6 +95,12 @@ describe MethodCall do
 
     it "should not change an arbitrary method which is already a setter but assign a new value" do
       MethodCall.new(:hello=, 'there').to_setter(65).to_a.should == [:hello=, 65]
+    end
+    
+    it "should not change itself" do
+      method_call = MethodCall.new(:[], 3)
+      setter = method_call.to_setter('yo')
+      method_call.to_a.should == [:[], 3]
     end
 
   end
