@@ -8,13 +8,6 @@ describe Mapping do
     @rec1, @rec2 = MethodCallRecorder.new.hello.there, MethodCallRecorder.new[:egg].stuff(4)
     @mapping = Mapping.new(@rec1, @rec2)
   end
-
-  it "should be able to determine the correct initial class for a mapping" do
-    @rec1.stub!(:method_types).and_return [:array_reader, :attr_reader]
-    @rec2.stub!(:method_types).and_return [:hash_reader,  :attr_reader]
-    @mapping.send(:initial_class, @rec1).should  == Array
-    @mapping.send(:initial_class, @rec2).should == Hash
-  end
   
   describe "mapping" do
     before(:each) do
