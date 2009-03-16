@@ -33,11 +33,11 @@ module ObjectMapper
       method_chain.inspect
     end
 
-    protected
-
     def method_chain
       @method_chain ||= []
     end
+
+    protected
 
     def add_to_method_chain(meth, *args)
       method_chain << MethodCall.new(meth, *args)

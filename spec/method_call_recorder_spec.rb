@@ -26,7 +26,7 @@ describe MethodCallRecorder do
     mc2 = stub_method_call(:[], 'be')
     mc3 = stub_method_call(:saved)
     @rec.this(:should)['be'].saved
-    @rec.send(:method_chain).should == [mc1, mc2, mc3]
+    @rec.method_chain.should == [mc1, mc2, mc3]
   end
 
   it "should be able to play back its method chain on another object" do
@@ -46,11 +46,11 @@ describe MethodCallRecorder do
     mc1 = stub_method_call(:once)
     mc2 = stub_method_call(:[], 3)
     @rec.once[3]
-    @rec.send(:method_chain).should == [mc1, mc2]
+    @rec.method_chain.should == [mc1, mc2]
     mc1 = stub_method_call(:twice)
     mc2 = stub_method_call(:[], :laugh)
     @rec.twice[:laugh]
-    @rec.send(:method_chain).should == [mc1, mc2]
+    @rec.method_chain.should == [mc1, mc2]
   end
 
   it "should be able to play back and assign a value" do
