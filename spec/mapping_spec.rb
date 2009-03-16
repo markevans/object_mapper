@@ -55,5 +55,16 @@ describe Mapping do
       lambda{ @mapping.map(@left, @right) }.should raise_error(ObjectMapper::MappingOutputError)
     end
   end
+  
+  describe "iterating over arrays" do
+    before(:each) do
+      pending "Need to implement!"
+      @rec1[:hello][]
+      @rec2[]['yo']
+    end
+    it "should map each element of an array if empty square brackets given" do
+      @mapping.map({:hello => [:a, :b]}, []).should == [{'yo' => :a}, {'yo' => :b}]
+    end
+  end
 
 end
