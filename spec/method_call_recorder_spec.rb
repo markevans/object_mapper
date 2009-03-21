@@ -53,13 +53,6 @@ describe MethodCallRecorder do
     @rec.method_chain.should == [mc1, mc2]
   end
 
-  it "should be able to play back and assign a value" do
-    @rec[:hello][:there]
-    obj = {:hello => {:there => 'yo'}}
-    @rec.play(obj, :assign => 'after')
-    obj.should == {:hello => {:there => 'after'}}
-  end
-
   it "should yield the current sub object, and the next two methods to be called as it plays back" do
     mc1 = MethodCall.new(:[], :hello)
     mc2 = MethodCall.new(:[], 2)
@@ -93,77 +86,15 @@ describe MethodCallRecorder do
     other_rec.should_not == @rec
     other_rec.root_ancestor.should == @rec
   end
-
-  describe "constructing with hashes" do
-
-    before(:each) do
-      @rec[:a]
-    end
-
-    it "should add to a hash" do
-      obj = {:b => 'already'}
-      @rec.play(obj, :assign => 'pigweed')
-      obj.should == {:a => 'pigweed', :b => 'already'}
-    end
-
-    it "should overwrite a hash key" do
-      obj = {:a => 'already'}
-      @rec.play(obj, :assign => 'pigweed')
-      obj.should == {:a => 'pigweed'}
-    end
-
-  end
-
-  describe "dealing with arrays" do
-
-    before(:each) do
-      @rec[2]
-    end
-
-    it "should construct an array if the key doesn't already exist" do
-      obj = []
-      @rec.play(obj, :assign => 'pigweed')
-      obj.should == [nil, nil, 'pigweed']
-    end
-
-    it "should add to an array" do
-      obj = [nil, 'already']
-      @rec.play(obj, :assign => 'pigweed')
-      obj.should == [nil, 'already', 'pigweed']
-    end
-
-    it "should overwrite an array entry" do
-      obj = ['one', :two, 'three', :four]
-      @rec.play(obj, :assign => 'pigweed')
-      obj.should == ['one', :two, 'pigweed', :four]
-    end
-
-  end
-
-  describe "constructing objects when assigning" do
-
-    before(:each) do
-      @rec[2][:hello][1]['ssup']
-    end
-
-    it "should construct a nested object if it starts as empty" do
-      obj = []
-      @rec.play(obj, :assign => 'yo')
-      obj.should == [nil, nil, {:hello => [nil, {'ssup' => 'yo'}]} ]
-    end
-
-    it "should construct a nested object and override a hash key if necessary" do
-      obj = [3,4,{:how_are => 'you', :hello => 'there'}]
-      @rec.play(obj, :assign => (4..5))
-      obj.should == [3, 4, {:how_are => 'you', :hello => [nil, {'ssup' => (4..5)}] }]
-    end
-
-    it "should construct a nested object and override an array key if necessary" do
-      obj = [:a, :b, :c, :d]
-      @rec.play(obj, :assign => 'done')
-      obj.should == [:a, :b, {:hello => [nil, {'ssup' => 'done'}]}, :d]
-    end
-
+  
+  it "should return a clone of itself with the last method as a setter" do
+    mc1 = MethodCall.new(:[], :hello)
+    mc2 = MethodCall.new(:there)
+    mc3 = MethodCall.new(:there=, 4)
+    @rec[:hello].there
+    other_rec = @rec.to_setter(4)
+    @rec.method_chain.should      == [mc1, mc2]
+    other_rec.method_chain.should == [mc1, mc3]
   end
 
 end

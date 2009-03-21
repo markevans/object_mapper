@@ -5,11 +5,12 @@ module ObjectMapper
       @parent = parent
     end
 
-    def play(object, opts={}, &blk)
-      if opts[:assign]
-        playback_and_assign(object, method_chain, opts[:assign])
-      else
-        playback(object, method_chain, &blk)
+    def play(object, &blk)
+      i = 0
+      method_chain.inject(object) do |obj, method_call|
+        i += 1
+        yield(obj, method_call, method_chain[i]) if block_given?
+        method_call.call_on(obj)
       end
     end
 
@@ -36,8 +37,17 @@ module ObjectMapper
     def method_chain
       @method_chain ||= []
     end
+    
+    def to_setter(value)
+      new_rec = self.dup
+      new_rec.method_chain = self.method_chain.dup
+      new_rec.method_chain[-1] = self.method_chain[-1].to_setter(value)
+      new_rec
+    end
 
     protected
+
+    attr_writer :method_chain
 
     def add_to_method_chain(meth, *args)
       method_chain << MethodCall.new(meth, *args)
@@ -47,31 +57,6 @@ module ObjectMapper
     attr_reader :parent, :child
 
     private
-
-    def playback(object, method_chain, &blk)
-      i = 0
-      method_chain.inject(object) do |obj, method_call|
-        i += 1
-        yield(obj, method_call, method_chain[i]) if block_given?
-        method_call.call_on(obj)
-      end
-    end
-
-    def playback_and_assign(object, method_chain, value)
-      if  method_chain.empty?
-        object = value
-      else
-        meth_chain = method_chain.dup
-        meth_chain[-1] = meth_chain[-1].to_setter(value)
-        playback(object, meth_chain) do |obj, method_call, next_method_call|
-          # Look ahead to the method which will be called, and pre-set it so that
-          # it will return something which can carry on the chain
-          sub_obj = next_method_call.ensure_obj_can_call(method_call.call_on(obj)) if next_method_call
-          method_call.to_setter(sub_obj).call_on(obj)
-          method_call.call_on(obj)
-        end
-      end
-    end
 
     def method_missing(meth, *args)
       @method_chain = []
