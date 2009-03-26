@@ -79,5 +79,26 @@ describe Mapper do
       MultiMapperClass.demap(@to).should == @from
     end
   end
+  
+  describe "more than one will_map declaration" do
+
+    it "should map using all declared mappings" do
+      class MultiDec
+        extend ObjectMapper::Mapper
+        will_map obj[0] => obj[:hi]
+        will_map obj[1] => obj[:dog]
+      end
+      MultiDec.map(['one', 'two']).should == {:hi => 'one', :dog => 'two'}
+    end
+    it "should use the second one if more than one will_map declares the mapping classes" do
+      class MultiDecClasses
+        extend ObjectMapper::Mapper
+        will_map String => Array
+        will_map Hash => Array
+        will_map obj[:hi] => obj[0]
+      end
+      MultiDecClasses.map({:hi => 1}).should == [1]
+    end
+  end
 
 end

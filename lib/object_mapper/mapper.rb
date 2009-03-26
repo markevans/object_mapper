@@ -6,9 +6,9 @@ module ObjectMapper
 
   module Mapper
 
-    def will_map(mappings)
-      mappings = extract_classes_from_mappings(mappings)
-      @mappings = mappings.map{|from,to| Mapping.new(from.root_ancestor, to.root_ancestor) }
+    def will_map(mapping_list)
+      mapping_list = extract_classes_from_mappings(mapping_list)
+      mapping_list.each{|from,to| mappings << Mapping.new(from.root_ancestor, to.root_ancestor) }
     end
 
     def obj
@@ -37,7 +37,7 @@ module ObjectMapper
     def extract_classes_from_mappings(mappings)
       class_mappings = mappings.select{|k,v| k.is_a? Class }
       if class_mappings.any?
-        raise MappingSpecificationError, "You specified mapping classes #{class_mappings.size} instead of once" unless class_mappings.size == 1
+        raise MappingSpecificationError, "You specified mapping classes more than once" unless class_mappings.size == 1
         @left_mapper_class, @right_mapper_class = class_mappings.first
         mappings.delete(@left_mapper_class)
       else
