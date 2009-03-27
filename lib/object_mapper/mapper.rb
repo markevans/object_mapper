@@ -8,7 +8,7 @@ module ObjectMapper
 
     def will_map(mapping_list)
       mapping_list = extract_classes_from_mappings(mapping_list)
-      mapping_list.each{|from,to| mappings << Mapping.new(from.root_ancestor, to.root_ancestor) }
+      mapping_list.each{|from,to| mappings << Mapping.new(from, to) }
     end
 
     def obj
