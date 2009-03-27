@@ -48,7 +48,7 @@ module ObjectMapper
 
     def determine_classes_from_mappings(mappings)
       mappings.to_a.first.map do |rec_object|
-        case rec_object.root_ancestor.method_types.first
+        case rec_object._first_method_type
         when :array_reader then Array
         when :hash_reader  then Hash
         else raise MappingSpecificationError, "Couldn't determine which classes to map. You need to state them explicitly"

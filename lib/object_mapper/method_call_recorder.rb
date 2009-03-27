@@ -14,8 +14,8 @@ module ObjectMapper
       method_chain.map{|method_call| method_call.method }
     end
 
-    def method_types
-      method_chain.map{|method_call| method_call.type }
+    def _first_method_type
+      method_chain.first.type
     end
 
     def to_s
