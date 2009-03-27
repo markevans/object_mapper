@@ -42,14 +42,22 @@ describe MethodCallRecorder do
     @rec.play(obj).should == obj
   end
 
-  it "should reset the method chain if you try to record twice" do
+  it "should record append to the method chain if you record twice" do
     mc1 = stub_method_call(:once)
-    mc2 = stub_method_call(:[], 3)
-    @rec.once[3]
+    mc2 = stub_method_call(:twice)
+    @rec.once
+    @rec.method_chain.should == [mc1]
+    @rec.twice
     @rec.method_chain.should == [mc1, mc2]
-    mc1 = stub_method_call(:twice)
-    mc2 = stub_method_call(:[], :laugh)
-    @rec.twice[:laugh]
+  end
+
+  it "should allow resetting the method chain" do
+    mc1 = stub_method_call(:once)
+    mc2 = stub_method_call(:twice)
+    @rec.once
+    @rec.method_chain.should == [mc1]
+    @rec._reset!
+    @rec.twice
     @rec.method_chain.should == [mc1, mc2]
   end
 
@@ -81,10 +89,8 @@ describe MethodCallRecorder do
     @rec.method_types.should == [:attr_reader, :array_reader, :hash_reader, :attr_writer]
   end
 
-  it "should be able to return its root ancestor recorder object" do
-    other_rec = @rec.hello[4].this(:is).now('innit')
-    other_rec.should_not == @rec
-    other_rec.root_ancestor.should == @rec
+  it "should return itself" do
+    @rec.hello[4].this(:is).now('innit').should == @rec
   end
   
   it "should return a clone of itself with the last method as a setter" do
