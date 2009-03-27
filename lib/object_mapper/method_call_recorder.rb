@@ -10,10 +10,6 @@ module ObjectMapper
       end
     end
 
-    def methods
-      method_chain.map{|method_call| method_call.method }
-    end
-
     def _first_method_type
       method_chain.first.type
     end

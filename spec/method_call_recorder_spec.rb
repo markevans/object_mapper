@@ -79,11 +79,6 @@ describe MethodCallRecorder do
     ]
   end
 
-  it "should return the methods (without args) called on it" do
-    @rec.hello[:boy].how('are').you?
-    @rec.methods.should == [:hello, :[], :how, :you?]
-  end
-
   it "should return the first method type called on it" do
     @rec.hello[3][:who?].egg = 4
     @rec._first_method_type.should == :attr_reader
