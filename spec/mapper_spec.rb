@@ -4,27 +4,25 @@ include ObjectMapper
 
 describe Mapper do
 
-  describe "determining the classes to map to and from" do
-    
-    it "should determine them when stated explicitly" do
+  describe "the classes to map to and from" do
+    before :each do
+      class Class1; attr_accessor :meth_1; end
+      class Class2; attr_accessor :meth_2; end
       class ExplicitMapperClass
         extend ObjectMapper::Mapper
-        will_map  String     => Array,
-                  obj.egg    => obj[1]
+        mapper_classes Class1, Class2
+        will_map obj.meth_1 => obj.meth_2
       end
-      ExplicitMapperClass.send(:left_mapper_class).should  == String
-      ExplicitMapperClass.send(:right_mapper_class).should == Array
+      @obj1, @obj2 = Class1.new, Class2.new
     end
-    
-    it "should raise an error if classes are specified too many times" do
-      lambda {
-        class TooManyClassesMapper
-          extend ObjectMapper::Mapper
-          will_map String => Array, Hash => Array
-        end
-      }.should raise_error(ObjectMapper::MappingSpecificationError)
+    it "should initialize the output on map when classes are stated explicitly" do
+      Class2.should_receive(:new).and_return @obj2
+      ExplicitMapperClass.map(@obj1).should == @obj2
     end
-
+    it "should initialize the output on demap when classes are stated explicitly" do
+      Class1.should_receive(:new).and_return @obj1
+      ExplicitMapperClass.demap(@obj2).should == @obj1
+    end
   end
 
   describe "one to one mapping" do
@@ -85,15 +83,7 @@ describe Mapper do
       end
       MultiDec.map(['one', 'two']).should == {:hi => 'one', :dog => 'two'}
     end
-    it "should use the second one if more than one will_map declares the mapping classes" do
-      class MultiDecClasses
-        extend ObjectMapper::Mapper
-        will_map String => Array
-        will_map Hash => Array
-        will_map obj[:hi] => obj[0]
-      end
-      MultiDecClasses.map({:hi => 1}).should == [1]
-    end
+    
   end
 
 end

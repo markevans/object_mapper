@@ -3,11 +3,13 @@ module ObjectMapper
   # Exceptions
   class MappingSpecificationError < StandardError; end
 
-
   module Mapper
 
+    def mapper_classes(left,right)
+      @left_class, @right_class = left, right
+    end
+
     def will_map(mapping_list)
-      @left_mapper_class, @right_mapper_class = extract_classes_from_mapping_spec(mapping_list)
       mapping_list.each{|from,to| mappings << Mapping.new(from, to) }
     end
 
@@ -26,20 +28,12 @@ module ObjectMapper
     private
     
     def map_in_direction(direction, input) # direction is either :rtl or :ltr
-      output = nil
+      output = output_class(direction) ? output_class(direction).new : nil
       mappings.each do |mapping|
         mapping.reverse! if direction == :rtl
         output = mapping.map(input, output)
       end
       output
-    end
-
-    def extract_classes_from_mapping_spec(mapping_spec)
-      class_mappings = extract_from(mapping_spec){|k,v| k.is_a? Class }
-      if class_mappings.any?
-        raise MappingSpecificationError, "You specified mapping classes more than once" if class_mappings.size > 1
-        class_mappings.first
-      end
     end
 
     def extract_from(mapping_spec, &blk)
@@ -53,11 +47,17 @@ module ObjectMapper
       extracted_pairs
     end
 
+    def input_class(direction)
+      direction == :ltr ? @left_class : @right_class
+    end
+    
+    def output_class(direction)
+      direction == :ltr ? @right_class : @left_class
+    end
+
     def mappings
       @mappings ||= []
     end
-
-    attr_reader :left_mapper_class, :right_mapper_class
 
   end
 end
