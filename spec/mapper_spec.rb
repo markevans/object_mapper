@@ -24,23 +24,18 @@ describe Mapper do
         end
       }.should raise_error(ObjectMapper::MappingSpecificationError)
     end
-    
-    it "should raise an error if classes need specifying" do
-      lambda {
-        class ClassesNeedSpecifying
-          extend ObjectMapper::Mapper
-          will_map obj.hi => obj['yo']
-        end
-      }.should raise_error(ObjectMapper::MappingSpecificationError)
-    end
-    
-    it "should determine automatically if square brackets are used" do
-      class ImplicitMapperClass
+
+  end
+
+  describe "one to one mapping" do
+    before(:each) do
+      class OneToOne
         extend ObjectMapper::Mapper
-        will_map obj[:hello][2] => obj[1][:this]
+        will_map obj => obj
       end
-      ImplicitMapperClass.send(:left_mapper_class).should  == Hash
-      ImplicitMapperClass.send(:right_mapper_class).should == Array
+    end
+    it "should description" do
+      OneToOne.map('hello').should == 'hello'
     end
   end
 

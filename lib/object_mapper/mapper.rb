@@ -7,7 +7,7 @@ module ObjectMapper
   module Mapper
 
     def will_map(mapping_list)
-      mapping_list = extract_classes_from_mappings(mapping_list)
+      @left_mapper_class, @right_mapper_class = extract_classes_from_mappings(mapping_list)
       mapping_list.each{|from,to| mappings << Mapping.new(from, to) }
     end
 
@@ -37,22 +37,10 @@ module ObjectMapper
     def extract_classes_from_mappings(mappings)
       class_mappings = mappings.select{|k,v| k.is_a? Class }
       if class_mappings.any?
-        raise MappingSpecificationError, "You specified mapping classes more than once" unless class_mappings.size == 1
-        @left_mapper_class, @right_mapper_class = class_mappings.first
-        mappings.delete(@left_mapper_class)
-      else
-        @left_mapper_class, @right_mapper_class = determine_classes_from_mappings(mappings)
-      end
-      mappings
-    end
-
-    def determine_classes_from_mappings(mappings)
-      mappings.to_a.first.map do |rec_object|
-        case rec_object._first_method_type
-        when :array_reader then Array
-        when :hash_reader  then Hash
-        else raise MappingSpecificationError, "Couldn't determine which classes to map. You need to state them explicitly"
-        end
+        raise MappingSpecificationError, "You specified mapping classes more than once" if class_mappings.size > 1
+        left, right = class_mappings.first
+        mappings.delete(left)
+        return [left, right]
       end
     end
 
