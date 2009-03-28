@@ -9,12 +9,20 @@ module ObjectMapper
       @left_class, @right_class = left, right
     end
 
-    def will_map(mapping_list)
-      mapping_list.each{|from,to| mappings << Mapping.new(from, to) }
+    def will_map(mapping_spec)
+      left_value_mapper, right_value_mapper = extract_value_mappers_from(mapping_spec)
+      mapping_spec.each do |from,to|
+        mappings << Mapping.new(from, to, :left_value_mapper => left_value_mapper,
+                                          :right_value_mapper => right_value_mapper)
+      end
     end
 
     def obj
       MethodCallRecorder.new
+    end
+    
+    def val(&blk)
+      lambda(&blk)
     end
 
     def map(input)
@@ -36,15 +44,16 @@ module ObjectMapper
       output
     end
 
-    def extract_from(mapping_spec, &blk)
-      extracted_pairs = []
+    def extract_value_mappers_from(mapping_spec)
+      value_mappers = []
       mapping_spec.each do |k,v|
-        if yield(k,v)
-          extracted_pairs << [k,v]
+        if k.is_a? Proc
+          value_mappers << [k,v]
           mapping_spec.delete(k)
         end
       end
-      extracted_pairs
+      raise MappingSpecificationError, "you can only specify the value mapper once" if value_mappers.size > 1
+      value_mappers.first
     end
 
     def input_class(direction)

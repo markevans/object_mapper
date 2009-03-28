@@ -85,5 +85,34 @@ describe Mapper do
     end
     
   end
+  
+  describe "value mapping" do
+    describe "using the value mapper on each mapping" do
+      before :each do
+        class ValueMapper
+          extend ObjectMapper::Mapper
+          will_map val{|v| v.upcase} => val{|v| v.downcase },
+                   obj[0]            => obj[:a],
+                   obj[1]            => obj[:b]
+        end
+        @from = ['ONE','TWO']
+        @to = {:a => 'one', :b => 'two'}
+      end
+      it "should map using the value mapper" do
+        ValueMapper.map(@from).should == @to
+      end
+      it "should reverse map using the value mapper" do
+        ValueMapper.demap(@to).should == @from
+      end
+      it "should raise an error if too many value mappers specified" do
+        lambda{
+          class TooManyVMs
+            extend ObjectMapper::Mapper
+            will_map val{} => val{}, val{} => val{}
+          end
+        }.should raise_error(ObjectMapper::MappingSpecificationError)
+      end
+    end
+  end
 
 end
