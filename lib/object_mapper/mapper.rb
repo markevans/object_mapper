@@ -7,7 +7,7 @@ module ObjectMapper
   module Mapper
 
     def will_map(mapping_list)
-      @left_mapper_class, @right_mapper_class = extract_classes_from_mappings(mapping_list)
+      @left_mapper_class, @right_mapper_class = extract_classes_from_mapping_spec(mapping_list)
       mapping_list.each{|from,to| mappings << Mapping.new(from, to) }
     end
 
@@ -34,14 +34,23 @@ module ObjectMapper
       output
     end
 
-    def extract_classes_from_mappings(mappings)
-      class_mappings = mappings.select{|k,v| k.is_a? Class }
+    def extract_classes_from_mapping_spec(mapping_spec)
+      class_mappings = extract_from(mapping_spec){|k,v| k.is_a? Class }
       if class_mappings.any?
         raise MappingSpecificationError, "You specified mapping classes more than once" if class_mappings.size > 1
-        left, right = class_mappings.first
-        mappings.delete(left)
-        return [left, right]
+        class_mappings.first
       end
+    end
+
+    def extract_from(mapping_spec, &blk)
+      extracted_pairs = []
+      mapping_spec.each do |k,v|
+        if yield(k,v)
+          extracted_pairs << [k,v]
+          mapping_spec.delete(k)
+        end
+      end
+      extracted_pairs
     end
 
     def mappings
