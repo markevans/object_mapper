@@ -26,7 +26,7 @@ describe MethodCallRecorder do
     mc2 = stub_method_call(:[], 'be')
     mc3 = stub_method_call(:saved)
     @rec.this(:should)['be'].saved
-    @rec.method_chain.should == [mc1, mc2, mc3]
+    @rec._method_chain.should == [mc1, mc2, mc3]
   end
 
   it "should be able to play back its method chain on another object" do
@@ -46,19 +46,19 @@ describe MethodCallRecorder do
     mc1 = stub_method_call(:once)
     mc2 = stub_method_call(:twice)
     @rec.once
-    @rec.method_chain.should == [mc1]
+    @rec._method_chain.should == [mc1]
     @rec.twice
-    @rec.method_chain.should == [mc1, mc2]
+    @rec._method_chain.should == [mc1, mc2]
   end
 
   it "should allow resetting the method chain" do
     mc1 = stub_method_call(:once)
     mc2 = stub_method_call(:twice)
     @rec.once
-    @rec.method_chain.should == [mc1]
+    @rec._method_chain.should == [mc1]
     @rec._reset!
     @rec.twice
-    @rec.method_chain.should == [mc1, mc2]
+    @rec._method_chain.should == [mc1, mc2]
   end
 
   it "should yield the current sub object, and the next two methods to be called as it plays back" do
@@ -94,8 +94,8 @@ describe MethodCallRecorder do
     mc3 = MethodCall.new(:there=, 4)
     @rec[:hello].there
     other_rec = @rec.to_setter(4)
-    @rec.method_chain.should      == [mc1, mc2]
-    other_rec.method_chain.should == [mc1, mc3]
+    @rec._method_chain.should      == [mc1, mc2]
+    other_rec._method_chain.should == [mc1, mc3]
   end
 
 end

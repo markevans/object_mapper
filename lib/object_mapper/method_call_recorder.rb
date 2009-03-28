@@ -3,44 +3,44 @@ module ObjectMapper
 
     def _play(object, &blk)
       i = 0
-      method_chain.inject(object) do |obj, method_call|
+      _method_chain.inject(object) do |obj, method_call|
         i += 1
-        yield(obj, method_call, method_chain[i]) if block_given?
+        yield(obj, method_call, _method_chain[i]) if block_given?
         method_call.call_on(obj)
       end
     end
 
     def _first_method_type
-      method_chain.first.type
+      _method_chain.first.type
     end
 
     def to_s
-      method_chain.inspect
+      _method_chain.inspect
     end
 
-    def method_chain
-      @method_chain ||= []
+    def _method_chain
+      @_method_chain ||= []
     end
     
     def to_setter(value)
       new_rec = self.dup
-      new_rec.method_chain = self.method_chain.dup
-      new_rec.method_chain[-1] = self.method_chain[-1].to_setter(value)
+      new_rec._method_chain = self._method_chain.dup
+      new_rec._method_chain[-1] = self._method_chain[-1].to_setter(value)
       new_rec
     end
     
     def _reset!
-      method_chain = []
+      _method_chain = []
     end
 
     protected
     
-    attr_writer :method_chain
+    attr_writer :_method_chain
 
     private
 
     def method_missing(meth, *args)
-      method_chain << MethodCall.new(meth, *args)
+      _method_chain << MethodCall.new(meth, *args)
       self
     end
 

@@ -46,11 +46,11 @@ module ObjectMapper
     end
     
     def assign_to_object(object, value)
-      if out_rec.method_chain.empty?
+      if out_rec._method_chain.empty?
         object = value
       else
         assign_rec = out_rec.to_setter(value)
-        object = ensure_obj_can_call_method(object, assign_rec.method_chain.first)
+        object = ensure_obj_can_call_method(object, assign_rec._method_chain.first)
         assign_rec._play(object) do |obj, method_call, next_method_call|
           # Look ahead to the method which will be called, and pre-set it so that
           # it will return something which can carry on the chain
