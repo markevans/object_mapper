@@ -23,6 +23,17 @@ describe Mapping do
     end
   end
 
+  describe "initializing objects" do
+    it "should guess the initial object as an array when the mapping has square brackets and integer" do
+      @rec2[1]
+      @mapping.map('yo', nil).should == [nil, 'yo']
+    end
+    it "should guess the initial object as a hash when the mapping has square brackets and sommink else" do
+      @rec2[:hi]
+      @mapping.map('yo', nil).should == {:hi => 'yo'}
+    end
+  end
+
   describe "simple and complex mappings" do
     it "should be able to map from a simple object to a simple one" do
       @mapping.map('bingo', nil).should == 'bingo'
