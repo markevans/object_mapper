@@ -122,6 +122,48 @@ describe Mapping do
     end
   end
 
+  describe "mapping values" do
+    before(:each) do
+      @vm = lambda{|v| v.upcase }
+    end
+    describe "when left mapper set" do
+      before(:each) do
+        @mapping = Mapping.new(@rec1, @rec2, :left_value_mapper => @vm)
+      end
+      it "should map without mapping value" do
+        @mapping.map('yo', nil).should == 'yo'
+      end
+      it "should map the other way using the mapper" do
+        @mapping.reverse!
+        @mapping.map('yo', nil).should == 'YO'
+      end
+    end
+    describe "when right mapper set" do
+      before(:each) do
+        @mapping = Mapping.new(@rec1, @rec2, :right_value_mapper => @vm)
+      end
+      it "should map using the mapper" do
+        @mapping.map('yo', nil).should == 'YO'
+      end
+      it "should map the other way normally" do
+        @mapping.reverse!
+        @mapping.map('yo', nil).should == 'yo'
+      end
+    end
+    describe "when both mappers set" do
+      before(:each) do
+        @mapping = Mapping.new(@rec1, @rec2, :left_value_mapper => @vm, :right_value_mapper => @vm)
+      end
+      it "should map using the mapper" do
+        @mapping.map('yo', nil).should == 'YO'
+      end
+      it "should map the other way normally" do
+        @mapping.reverse!
+        @mapping.map('yo', nil).should == 'YO'
+      end
+    end
+  end
+
   describe "iterating over arrays" do
     before(:each) do
       pending "Need to implement!"

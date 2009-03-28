@@ -7,15 +7,18 @@ module ObjectMapper
   
   class Mapping
 
-    def initialize(left_rec, right_rec)
+    def initialize(left_rec, right_rec, opts={})
       @left_rec  = left_rec
       @right_rec = right_rec
       @direction = :ltr
+      @left_value_mapper = opts[:left_value_mapper]
+      @right_value_mapper = opts[:right_value_mapper]
     end
 
     def map(input, output)
       begin
         value = in_rec._play(input)
+        value = value_mapper.call(value)
       rescue NoMethodError, ArgumentError => e
         raise MappingInputError, "Couldn't apply mapping to input: #{e.message}"
       end
@@ -31,18 +34,23 @@ module ObjectMapper
     private
     
     def in_rec
-      recorder_objects[0]
+      @direction == :ltr ? @left_rec : @right_rec
     end
     
     def out_rec
-      recorder_objects[1]
+      @direction == :ltr ? @right_rec : @left_rec
     end
 
-    def recorder_objects
-      case @direction
-      when :ltr then [@left_rec, @right_rec]
-      when :rtl then [@right_rec, @left_rec]
-      end
+    def value_mapper
+      @direction == :ltr ? right_value_mapper : left_value_mapper
+    end
+
+    def left_value_mapper
+      @left_value_mapper || lambda{|v| v }
+    end
+    
+    def right_value_mapper
+      @right_value_mapper || lambda{|v| v }
     end
     
     def assign_to_object(object, value)
