@@ -114,5 +114,30 @@ describe Mapper do
       end
     end
   end
+  
+  describe "delegated value mapping" do
+    before(:each) do
+      class DelegatedMapper
+        def self.map(arg)
+          'delegated map!'
+        end
+        def self.demap(arg)
+          'delegated demap!'
+        end
+      end
+      class DelegatorMapper
+        extend ObjectMapper::Mapper
+        will_map_using DelegatedMapper,
+                       obj[0] => obj['0'],
+                       obj[1] => obj['1']
+      end
+    end
+    it "should delegate value mapping for each mapping" do
+      DelegatorMapper.map([:a,:b]).should == {'0' => 'delegated map!', '1' => 'delegated map!'}
+    end
+    it "should delegate reverse value mapping for each mapping" do
+      DelegatorMapper.demap({'0' => :a, '1' => :b}).should == ['delegated demap!', 'delegated demap!']
+    end
+  end
 
 end

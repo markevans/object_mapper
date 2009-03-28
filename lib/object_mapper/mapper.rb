@@ -17,6 +17,13 @@ module ObjectMapper
       end
     end
 
+    def will_map_using(value_mapper, mapping_spec)
+      mapping_spec.each do |from,to|
+        mappings << Mapping.new(from, to, :left_value_mapper => value_mapper.method(:demap),
+                                          :right_value_mapper => value_mapper.method(:map))
+      end
+    end
+
     def obj
       MethodCallRecorder.new
     end
