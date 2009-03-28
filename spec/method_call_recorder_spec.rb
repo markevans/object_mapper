@@ -93,7 +93,7 @@ describe MethodCallRecorder do
     mc2 = MethodCall.new(:there)
     mc3 = MethodCall.new(:there=, 4)
     @rec[:hello].there
-    other_rec = @rec.to_setter(4)
+    other_rec = @rec._to_setter(4)
     @rec._method_chain.should      == [mc1, mc2]
     other_rec._method_chain.should == [mc1, mc3]
   end

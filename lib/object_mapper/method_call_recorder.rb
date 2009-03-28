@@ -22,7 +22,7 @@ module ObjectMapper
       @_method_chain ||= []
     end
     
-    def to_setter(value)
+    def _to_setter(value)
       new_rec = self.dup
       new_rec._method_chain = self._method_chain.dup
       new_rec._method_chain[-1] = self._method_chain[-1].to_setter(value)
