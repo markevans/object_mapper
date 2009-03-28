@@ -1,7 +1,7 @@
 module ObjectMapper
   class MethodCallRecorder
 
-    def play(object, &blk)
+    def _play(object, &blk)
       i = 0
       method_chain.inject(object) do |obj, method_call|
         i += 1

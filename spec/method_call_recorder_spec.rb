@@ -34,12 +34,12 @@ describe MethodCallRecorder do
     struct = mock('struct', :fish => inner)
     obj = { :a => [struct, 2] }
     @rec[:a][0].fish.duck
-    @rec.play(obj).should == 'hello'
+    @rec._play(obj).should == 'hello'
   end
 
   it "should just return the object on play if its method chain is empty" do
     obj = Object.new
-    @rec.play(obj).should == obj
+    @rec._play(obj).should == obj
   end
 
   it "should record append to the method chain if you record twice" do
@@ -69,7 +69,7 @@ describe MethodCallRecorder do
     def str.eggy_bread; 'egg'; end
     @rec[:hello][2].eggy_bread
     yielded_values = []
-    @rec.play({:hello => ['no','and',str]}) do |obj, method_call, next_method_call|
+    @rec._play({:hello => ['no','and',str]}) do |obj, method_call, next_method_call|
       yielded_values << [obj, method_call, next_method_call]
     end
     yielded_values.should == [

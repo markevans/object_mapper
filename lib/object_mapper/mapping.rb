@@ -15,7 +15,7 @@ module ObjectMapper
 
     def map(input, output)
       begin
-        value = in_rec.play(input)
+        value = in_rec._play(input)
       rescue NoMethodError, ArgumentError => e
         raise MappingInputError, "Couldn't apply mapping to input: #{e.message}"
       end
@@ -51,7 +51,7 @@ module ObjectMapper
       else
         assign_rec = out_rec.to_setter(value)
         object = ensure_obj_can_call_method(object, assign_rec.method_chain.first)
-        assign_rec.play(object) do |obj, method_call, next_method_call|
+        assign_rec._play(object) do |obj, method_call, next_method_call|
           # Look ahead to the method which will be called, and pre-set it so that
           # it will return something which can carry on the chain
           sub_obj = method_call.call_on(obj)
