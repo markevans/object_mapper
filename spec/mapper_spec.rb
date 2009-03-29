@@ -19,9 +19,9 @@ describe Mapper do
       Class2.should_receive(:new).and_return @obj2
       ExplicitMapperClass.map(@obj1).should == @obj2
     end
-    it "should initialize the output on demap when classes are stated explicitly" do
+    it "should initialize the output on reverse_map when classes are stated explicitly" do
       Class1.should_receive(:new).and_return @obj1
-      ExplicitMapperClass.demap(@obj2).should == @obj1
+      ExplicitMapperClass.reverse_map(@obj2).should == @obj1
     end
   end
 
@@ -49,8 +49,8 @@ describe Mapper do
     it "should be able to normalize a nested hash/array correctly from a single mapping" do
       SingleMapperClass.map({:yo => 3, :hello => [88,99,100,333]}).should == [nil, {:this => 100}]
     end
-    it "should be able to demap a nested hash/array correctly from a single mapping" do
-      SingleMapperClass.demap([:a, {:this => 'is', :quite => 'Good'}, :b]).should == {:hello => [nil,nil,'is']}
+    it "should be able to reverse_map a nested hash/array correctly from a single mapping" do
+      SingleMapperClass.reverse_map([:a, {:this => 'is', :quite => 'Good'}, :b]).should == {:hello => [nil,nil,'is']}
     end
   end
 
@@ -69,7 +69,7 @@ describe Mapper do
       MultiMapperClass.map(@from).should == @to
     end
     it "should be able to denormalize more than one mapping on the same object" do
-      MultiMapperClass.demap(@to).should == @from
+      MultiMapperClass.reverse_map(@to).should == @from
     end
   end
   
@@ -102,7 +102,7 @@ describe Mapper do
         ValueMapper.map(@from).should == @to
       end
       it "should reverse map using the value mapper" do
-        ValueMapper.demap(@to).should == @from
+        ValueMapper.reverse_map(@to).should == @from
       end
       it "should raise an error if too many value mappers specified" do
         lambda{
@@ -121,8 +121,8 @@ describe Mapper do
         def self.map(arg)
           'delegated map!'
         end
-        def self.demap(arg)
-          'delegated demap!'
+        def self.reverse_map(arg)
+          'delegated reverse_map!'
         end
       end
       class DelegatorMapper
@@ -136,7 +136,7 @@ describe Mapper do
       DelegatorMapper.map([:a,:b]).should == {'0' => 'delegated map!', '1' => 'delegated map!'}
     end
     it "should delegate reverse value mapping for each mapping" do
-      DelegatorMapper.demap({'0' => :a, '1' => :b}).should == ['delegated demap!', 'delegated demap!']
+      DelegatorMapper.reverse_map({'0' => :a, '1' => :b}).should == ['delegated reverse_map!', 'delegated reverse_map!']
     end
   end
 

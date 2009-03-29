@@ -19,7 +19,7 @@ module ObjectMapper
 
     def will_map_using(value_mapper, mapping_spec)
       mapping_spec.each do |from,to|
-        mappings << Mapping.new(from, to, :left_value_mapper => value_mapper.method(:demap),
+        mappings << Mapping.new(from, to, :left_value_mapper => value_mapper.method(:reverse_map),
                                           :right_value_mapper => value_mapper.method(:map))
       end
     end
@@ -36,7 +36,7 @@ module ObjectMapper
       map_in_direction(:ltr, input)
     end
 
-    def demap(input)
+    def reverse_map(input)
       map_in_direction(:rtl, input)
     end
 
